@@ -27,7 +27,7 @@ do
 
     if [ -z "${i##*TargetDate*}" ] ;then
         tmp=`echo $i | awk '{print $4}' | sed -e "s/'//"`
-        date=$(echo $tmp | awk -F/ '{printf("%s/%s", $3, $1)}')
+        date=$(echo $tmp | awk -F/ '{printf("%d/%02d", $3, $1)}')
         echo "\$date = ($date)"
     fi
 
@@ -52,5 +52,5 @@ echo "Desc:  $desc"  >> $mytext
 echo "URL:   $mp3"   >> $mytext
 
 #aria2c -x 8 -o "$myfile" $mp3
-curl $mp3 > $myfile
+curl  $mp3 > $myfile
 

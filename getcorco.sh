@@ -5,13 +5,14 @@ id=$(basename $url)
 
 AUDIO_PATH="$HOME/Dropbox/Fortune\ Builders\ 2015/CorCo\ \-\ Capital\ Club\ Recordings"
 AUDIO_PATH="$HOME/Dropbox/Fortune Builders 2015/CorCo - Capital Club Recordings"
+AUDIO_PATH="$HOME/pcloud/CorCo - Capital Club Recordings"
 
 ##new="http://events.instantteleseminar.com/?eventid=$id"
 
 IFS="
 "
 
-for i in `curl -s curl -s http://events.attendthisevent.com/Classic/?eventid=$id | egrep ':title|:description|TargetDate|mp3'`
+for i in `curl -s http://events.attendthisevent.com/Classic/?eventid=$id | egrep ':title|:description|TargetDate|mp3'`
 do
     if [ -z "${i##*title*}" ] ;then
         title=`echo $i | grep -o ' content=['"'"'"][^"'"'"']*['"'"'"]' | \
@@ -41,15 +42,20 @@ done
 
 echo "hi"
 
+title=$(echo "$title" | sed -e 's|w/|with|g')
+title=$(echo "$title" | sed -e 's|\&|and|g')
+echo $title
+
 mypath="${AUDIO_PATH}/${date}"
 myfile="${mypath}/${title}.mp3"
 mytext="${mypath}/${title}.txt"
 
 mkdir -pv "$mypath"
 
-echo "Title: $title" >  $mytext
-echo "Desc:  $desc"  >> $mytext
-echo "URL:   $mp3"   >> $mytext
+echo > $mytext
+echo "Title: $title" | tee -a $mytext
+echo "Desc:  $desc"  | tee -a $mytext
+echo "URL:   $mp3"   | tee -a $mytext
 
 #aria2c -x 8 -o "$myfile" $mp3
 curl  $mp3 > $myfile

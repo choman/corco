@@ -21,15 +21,21 @@ function stuff
     local line=""
 
     for line in $(echo $tmp | tr ',' '\n'); do
+        if [[ $line =~ .Title\". ]]; then
+            title=$(echo ${line#*:} | tr -d '\\' | tr -d '"')
+            echo $title
+        fi
+
         if [[ $line =~ .EventDate\". ]]; then
             date=$(echo ${line#*:} | tr -d '\\' | tr -d '"')
             fixme=$(echo $date | awk -F/ '{printf "%s/%s", $3, $1}')
-
         fi
+
         if [[ $line =~ .RecordingURL\". ]]; then
             url=$(echo ${line#*:} | tr -d '\\' | tr -d '"')
             mp3=$(echo ${url:: -3})
         fi
+
     done
 }
 
@@ -39,17 +45,20 @@ IFS="
 
 for i in $(curl -s $new | egrep ':title|EventDate|mp3')
 do
-    if [ -z "${i##*title*}" ] ;then
-        title=`echo $i | grep -o ' content=['"'"'"][^"'"'"']*['"'"'"]' | \
-                         sed -e 's/^ content=["'"'"']//' -e 's/["'"'"']$//'`
-        echo "title = ($title)"
-    fi
+##    if [ -z "${i##*title*}" ] ;then
+##        title=`echo $i | grep -o ' content=['"'"'"][^"'"'"']*['"'"'"]' | \
+##                         sed -e 's/^ content=["'"'"']//' -e 's/["'"'"']$//'`
+##        echo "title = ($title)"
+##    fi
 
 ##    if [ -z "${i##*EventDate*}" ] ;then
 ##        tmp=`echo $i | awk '{print $4}' | sed -e "s/'//"`
 ##        date=$(echo $tmp | awk -F/ '{printf("%d/%02d", $3, $1)}')
 ##        echo "\$date = ($date)"
 ##    fi
+    if [[ $i =~ .Title. ]]; then
+        stuff $i
+    fi
 
     if [[ $i =~ .EventDate. ]]; then
         stuff $i

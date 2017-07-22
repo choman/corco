@@ -19,20 +19,24 @@ function stuff1
 {
    local tmp=$1
 
-   echo ${tmp}
-   tmp=$(echo ${tmp:17})
-   tmp=$(echo ${tmp:: -1})
-   tmp="[$tmp]"
+   if [[ $i =~ .EVENTVARS. ]]; then
 
-   echo $(echo $tmp | jq .)
-   echo $(echo $tmp | jq '.[].id')
-   echo $(echo $tmp | jq '.[]|keys|.[0]')
-   echo ${tmp} | jq '.EventDate | to_entries[]'
-   echo ${tmp} | jq '.Title | to_entries[]'
-   echo ${tmp} | jq '[.Title]'
+      tmp=$(echo ${tmp:17})
+      tmp=$(echo ${tmp:: -1})
+      tmp="[$tmp]"
 
-   echo $(echo $tmp | jq '.[] | select(.id=="EventDate")')
-   echo $(echo $tmp | jq '.[] | select(.id=="Title")')
+      date=$(echo ${tmp} | jq '.[] | .EventDate' | tr -d '"')
+      fixme=$(echo $date | awk -F/ '{printf "%s/%s", $3, $1}')
+      title=$(echo ${tmp} | jq '.[] | .Title' | tr -d '"')
+
+   else
+      tmp=$(echo ${tmp:19})
+      tmp=$(echo ${tmp:: -2})
+      tmp="[$tmp]"
+
+      mp3=$(echo ${tmp} | jq '.[] | .RecordingURL' | tr -d '"')
+
+   fi
 
 }
 
@@ -66,17 +70,25 @@ IFS="
 
 for i in $(curl -s $new | egrep ':title|EventDate|mp3')
 do
-    if [[ $i =~ .Title. ]]; then
+
+##    if [[ $i =~ .Title. ]]; then
+##        stuff $i
+##    fi
+
+##    if [[ $i =~ .EventDate. ]]; then
+##        stuff $i
+##    fi
+
+##    if [[ $i =~ .mp3. ]]; then
+##        stuff $i
+##    fi
+
+    if [[ $i =~ .EVENTVARS. ]]; then
         stuff1 $i
-        stuff $i
     fi
 
-    if [[ $i =~ .EventDate. ]]; then
-        stuff $i
-    fi
-
-    if [[ $i =~ .mp3. ]]; then
-        stuff $i
+    if [[ $i =~ .REPLAYVARS. ]]; then
+        stuff1 $i
     fi
 
 done
@@ -93,8 +105,6 @@ echo $fixme
 mypath="${AUDIO_PATH}/${fixme}"
 myfile="${mypath}/${title}.mp3"
 mytext="${mypath}/${title}.txt"
-
-exit
 
 mkdir -pv "$mypath"
 

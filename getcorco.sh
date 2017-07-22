@@ -15,6 +15,27 @@ AUDIO_PATH="$HOME/CorCo - Capital Club Recordings"
 new="http://events.instantteleseminar.com/?eventid=$id"
 new="http://events.iteleseminar.com/?eventid=$id"
 
+function stuff1
+{
+   local tmp=$1
+
+   echo ${tmp}
+   tmp=$(echo ${tmp:17})
+   tmp=$(echo ${tmp:: -1})
+   tmp="[$tmp]"
+
+   echo $(echo $tmp | jq .)
+   echo $(echo $tmp | jq '.[].id')
+   echo $(echo $tmp | jq '.[]|keys|.[0]')
+   echo ${tmp} | jq '.EventDate | to_entries[]'
+   echo ${tmp} | jq '.Title | to_entries[]'
+   echo ${tmp} | jq '[.Title]'
+
+   echo $(echo $tmp | jq '.[] | select(.id=="EventDate")')
+   echo $(echo $tmp | jq '.[] | select(.id=="Title")')
+
+}
+
 function stuff
 {
     local tmp=$1
@@ -45,18 +66,8 @@ IFS="
 
 for i in $(curl -s $new | egrep ':title|EventDate|mp3')
 do
-##    if [ -z "${i##*title*}" ] ;then
-##        title=`echo $i | grep -o ' content=['"'"'"][^"'"'"']*['"'"'"]' | \
-##                         sed -e 's/^ content=["'"'"']//' -e 's/["'"'"']$//'`
-##        echo "title = ($title)"
-##    fi
-
-##    if [ -z "${i##*EventDate*}" ] ;then
-##        tmp=`echo $i | awk '{print $4}' | sed -e "s/'//"`
-##        date=$(echo $tmp | awk -F/ '{printf("%d/%02d", $3, $1)}')
-##        echo "\$date = ($date)"
-##    fi
     if [[ $i =~ .Title. ]]; then
+        stuff1 $i
         stuff $i
     fi
 
@@ -67,12 +78,6 @@ do
     if [[ $i =~ .mp3. ]]; then
         stuff $i
     fi
-
-##    if [ -z "${i##*mp3*}" ] ;then
-##        mp3=`echo $i |  grep -o 'href=['"'"'"][^"'"'"']*['"'"'"]' | \
-##                   sed -e 's/href=["'"'"']//' -e 's/["'"'"']$//'`
-##        echo "mp3 = ($mp3)"
-##    fi
 
 done
 
@@ -88,6 +93,8 @@ echo $fixme
 mypath="${AUDIO_PATH}/${fixme}"
 myfile="${mypath}/${title}.mp3"
 mytext="${mypath}/${title}.txt"
+
+exit
 
 mkdir -pv "$mypath"
 

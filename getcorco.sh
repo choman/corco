@@ -3,9 +3,8 @@
 url=$1
 id=$(basename $url)
 
-echo \$url = $url
-echo \$id = $id
-
+##echo \$url = $url
+##echo \$id = $id
 
 AUDIO_PATH="$HOME/Dropbox/Fortune\ Builders\ 2015/CorCo\ \-\ Capital\ Club\ Recordings"
 AUDIO_PATH="$HOME/Dropbox/Fortune Builders 2015/CorCo - Capital Club Recordings"
@@ -25,16 +24,16 @@ function stuff1
       tmp=$(echo ${tmp:: -1})
       tmp="[$tmp]"
 
-      date=$(echo ${tmp} | jq '.[] | .EventDate' | tr -d '"')
+      date=$(echo ${tmp} | jq -r '.[] | .EventDate')
       fixme=$(echo $date | awk -F/ '{printf "%s/%s", $3, $1}')
-      title=$(echo ${tmp} | jq '.[] | .Title' | tr -d '"')
+      title=$(echo ${tmp} | jq -r '.[] | .Title')
 
    else
       tmp=$(echo ${tmp:19})
       tmp=$(echo ${tmp:: -2})
       tmp="[$tmp]"
 
-      mp3=$(echo ${tmp} | jq '.[] | .RecordingURL' | tr -d '"')
+      mp3=$(echo ${tmp} | jq -r '.[] | .RecordingURL')
 
    fi
 
@@ -93,14 +92,14 @@ do
 
 done
 
-echo "hi"
+echo "Getting Corco recording"
 
 title=$(echo "$title" | sed -e 's|w/|with|g')
 title=$(echo "$title" | sed -e 's|\&|and|g')
-echo $title
-echo $date
-echo $mp3
-echo $fixme
+echo "Title = $title"
+echo "Date  = $date"
+echo "URL   = $mp3"
+echo "Dir   = $fixme"
 
 mypath="${AUDIO_PATH}/${fixme}"
 myfile="${mypath}/${title}.mp3"
